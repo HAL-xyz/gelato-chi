@@ -1,15 +1,13 @@
-// ES6 module imports via require
-require("@babel/register");
-
 // Libraries
-const assert = require("assert");
+// const assert = require("assert");
+const { utils } = require("ethers");
 
 // Process Env Variables
 require("dotenv").config();
 const INFURA_ID = process.env.DEMO_INFURA_ID;
 const USER_PK = process.env.DEMO_USER_PK;
-assert.ok(INFURA_ID, "no Infura ID in process.env");
-assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
+// // assert.ok(INFURA_ID, "no Infura ID in process.env");
+// // assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
 
 // ================================= CONFIG =========================================
 module.exports = {
@@ -17,18 +15,16 @@ module.exports = {
   networks: {
     rinkeby: {
       // Standard
-      accounts: [USER_PK],
+      accounts: USER_PK ? [USER_PK] : [],
       chainId: 4,
-      // gas: 4000000,  // 4 million
-      // gasPrice: "auto",
       url: `https://rinkeby.infura.io/v3/${INFURA_ID}`,
       // Custom
       // Rinkeby: addressBook
       addressBook: {
         // Rinkeby: erc20s
         erc20: {
-          CHI: "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa",
-          "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa": "DAI",
+          CHI: "",
+          "": "CHI",
         },
         // Rinkeby: Gelato
         gelatoExecutor: {
@@ -38,7 +34,7 @@ module.exports = {
       // Rinkeby: Deployments
       deployments: {
         // ==== Actions ====
-        ActionMintChi: "0xe2B2f27D674F49fB3d67D6D21F5d85EFe2B95635",
+        ActionChiMint: "",
         // ===== Gelato Core ====
         GelatoCore: "0x733aDEf4f8346FD96107d8d6605eA9ab5645d632",
         // === GelatoUserProxies ===
@@ -50,24 +46,74 @@ module.exports = {
     },
   },
   solc: {
-    version: "0.6.12",
+    version: "0.6.10",
     optimizer: { enabled: true },
   },
 };
 
-// ================================= BRE extension ==================================
-extendEnvironment((bre) => {
-  bre.getUserWallet = async () => {
-    const [userWallet] = await bre.ethers.getSigners();
-    return userWallet;
-  };
-  bre.getUserAddress = async () => {
-    const [userWallet] = await bre.ethers.getSigners();
-    const userAddress = await userWallet.getAddress();
-    return userAddress;
-  };
-});
-
 // ================================= PLUGINS =========================================
 usePlugin("@nomiclabs/buidler-ethers");
 usePlugin("@nomiclabs/buidler-waffle");
+
+// ================================= TASKS =========================================
+task("abi-encode-withselector")
+  .addPositionalParam(
+    "abi",
+    "Contract ABI in array form",
+    undefined,
+    types.json
+  )
+  .addPositionalParam("functionname")
+  .addOptionalVariadicPositionalParam(
+    "inputs",
+    "Array of function params",
+    undefined,
+    types.json
+  )
+  .addFlag("log")
+  .setAction(async (taskArgs) => {
+    try {
+      if (taskArgs.log) console.log(taskArgs);
+
+      if (!taskArgs.abi)
+        throw new Error("abi-encode-withselector: no abi passed");
+
+      const interFace = new utils.Interface(taskArgs.abi);
+
+      let functionFragment;
+      try {
+        functionFragment = interFace.getFunction(taskArgs.functionname);
+      } catch (error) {
+        throw new Error(
+          `\n ❌ abi-encode-withselector: functionname "${taskArgs.functionname}" not found`
+        );
+      }
+
+      let payloadWithSelector;
+
+      if (taskArgs.inputs) {
+        let iterableInputs;
+        try {
+          iterableInputs = [...taskArgs.inputs];
+        } catch (error) {
+          iterableInputs = [taskArgs.inputs];
+        }
+        payloadWithSelector = interFace.encodeFunctionData(
+          functionFragment,
+          iterableInputs
+        );
+      } else {
+        payloadWithSelector = interFace.encodeFunctionData(
+          functionFragment,
+          []
+        );
+      }
+
+      if (taskArgs.log)
+        console.log(`\nEncodedPayloadWithSelector:\n${payloadWithSelector}\n`);
+      return payloadWithSelector;
+    } catch (err) {
+      console.error(err);
+      process.exit(1);
+    }
+  });
