@@ -12,6 +12,11 @@ const USER_PK = process.env.DEMO_USER_PK;
 // ================================= CONFIG =========================================
 module.exports = {
   defaultNetwork: "buidlerevm",
+  namedAccounts: {
+    deployer: {
+      default: 0, // here this will by default take the first account as deployer
+    },
+  },
   networks: {
     rinkeby: {
       // Standard
@@ -54,6 +59,7 @@ module.exports = {
 // ================================= PLUGINS =========================================
 usePlugin("@nomiclabs/buidler-ethers");
 usePlugin("@nomiclabs/buidler-waffle");
+usePlugin("buidler-deploy");
 
 // ================================= TASKS =========================================
 task("abi-encode-withselector")

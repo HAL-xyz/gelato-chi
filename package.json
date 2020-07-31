@@ -18,5 +18,8 @@
     "ethereum-waffle": "3.0.2",
     "ethers": "5.0.7",
     "prettier": "2.0.3"
+  },
+  "dependencies": {
+    "buidler-deploy": "^0.5.8"
   }
 }
