@@ -2,6 +2,30 @@
 // const assert = require("assert");
 const { utils } = require("ethers");
 
+// Classes
+const Action = require("./src/classes/gelato/Action");
+const Condition = require("./src/classes/gelato/Condition");
+const GelatoProvider = require("./src/classes/gelato/GelatoProvider");
+const Task = require("./src/classes/gelato/Task");
+const TaskSpec = require("./src/classes/gelato/TaskSpec");
+const TaskReceipt = require("./src/classes/gelato/TaskReceipt");
+
+// Objects/Enums
+const Operation = require("./src/enums/gelato/Operation");
+const DataFlow = require("./src/enums/gelato/DataFlow");
+
+// Helpers
+// Async
+const sleep = require("./src/helpers/async/sleep");
+// Gelato
+const convertTaskReceiptArrayToObj = require("./src/helpers/gelato/convertTaskReceiptArrayToObj");
+const convertTaskReceiptObjToArray = require("./src/helpers/gelato/convertTaskReceiptObjToArray");
+// Nested Arrays
+const nestedArraysAreEqual = require("./src/helpers/nestedArrays/nestedArraysAreEqual");
+// Nested Objects
+const checkNestedObj = require("./src/helpers/nestedObjects/checkNestedObj");
+const getNestedObj = require("./src/helpers/nestedObjects/getNestedObj");
+
 // Process Env Variables
 require("dotenv").config();
 const INFURA_ID = process.env.DEMO_INFURA_ID;
@@ -63,6 +87,29 @@ module.exports = {
   },
 };
 
+// ================================= BRE extension ==================================
+extendEnvironment((bre) => {
+  // Classes
+  bre.Action = Action;
+  bre.Condition = Condition;
+  bre.GelatoProvider = GelatoProvider;
+  bre.Task = Task;
+  bre.TaskSpec = TaskSpec;
+  bre.TaskReceipt = TaskReceipt;
+  // Objects/Enums
+  bre.Operation = Operation;
+  bre.DataFlow = DataFlow;
+  // Functions
+  // Gelato
+  bre.convertTaskReceiptArrayToObj = convertTaskReceiptArrayToObj;
+  bre.convertTaskReceiptObjToArray = convertTaskReceiptObjToArray;
+  // Nested Arrays
+  bre.nestedArraysAreEqual = nestedArraysAreEqual;
+  // Nested Objects
+  bre.checkNestedObj = checkNestedObj;
+  bre.getNestedObj = getNestedObj;
+});
+
 // ================================= PLUGINS =========================================
 usePlugin("@nomiclabs/buidler-ethers");
 usePlugin("@nomiclabs/buidler-waffle");
@@ -94,14 +141,8 @@ task("abi-encode-withselector")
 
       const interFace = new utils.Interface(taskArgs.abi);
 
-      let functionFragment;
-      try {
-        functionFragment = interFace.getFunction(taskArgs.functionname);
-      } catch (error) {
-        throw new Error(
-          `\n ❌ abi-encode-withselector: functionname "${taskArgs.functionname}" not found`
-        );
-      }
+      if (!checkNestedObj(interFace, "functions", taskArgs.functionname))
+        throw new Error("\nfunctionname is not on contract's interface");
 
       let payloadWithSelector;
 
@@ -112,13 +153,11 @@ task("abi-encode-withselector")
         } catch (error) {
           iterableInputs = [taskArgs.inputs];
         }
-        payloadWithSelector = interFace.encodeFunctionData(
-          functionFragment,
+        payloadWithSelector = interFace.functions[taskArgs.functionname].encode(
           iterableInputs
         );
       } else {
-        payloadWithSelector = interFace.encodeFunctionData(
-          functionFragment,
+        payloadWithSelector = interFace.functions[taskArgs.functionname].encode(
           []
         );
       }

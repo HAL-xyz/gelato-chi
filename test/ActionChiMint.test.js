@@ -3,6 +3,7 @@
 const { expect } = require("chai");
 const bre = require("@nomiclabs/buidler");
 const { ethers } = bre;
+const { utils } = require("ethers");
 const GelatoCoreLib = require("@gelatonetwork/core");
 const GelatoUserProxyLib = require("@gelatonetwork/gelato-user-proxy");
 
@@ -139,7 +140,7 @@ describe("ActionChiMint Local Test Suite", function () {
     // 1) We assign our testUserAddress as Executor for test simulation
     // 2) We whitelist providerModuleGelatoUserProxy as our SelfProvider module
     // 3) We depost funds on GelatoCore to pay for automated CHI minting later
-    const selfProviderSetupAction = new GelatoCoreLib.Action({
+    const selfProviderSetupAction = new Action({
       addr: gelatoCore.address,
       data: await bre.run("abi-encode-withselector", {
         abi: GelatoCoreLib.GelatoCore.abi,
@@ -167,15 +168,15 @@ describe("ActionChiMint Local Test Suite", function () {
     await actionChiMint.deployed();
 
     // Instantiate GelatoProvider type for our SelfProvider
-    gelatoSelfProvider = new GelatoCoreLib.GelatoProvider({
+    gelatoSelfProvider = new GelatoProvider({
       addr: gelatoUserProxyAddress,
       module: providerModuleGelatoUserProxy.address,
     });
 
     // Specify and Instantiate the Gelato Task
-    taskAutoMintWhenTriggerGasPrice = new GelatoCoreLib.Task({
+    taskAutoMintWhenTriggerGasPrice = new Task({
       actions: [
-        new GelatoCoreLib.Action({
+        new Action({
           addr: actionChiMint.address,
           data: await actionChiMint.getActionData(
             testUserAddress, // recipient of CHI Tokens
@@ -202,7 +203,7 @@ describe("ActionChiMint Local Test Suite", function () {
     ).to.emit(gelatoCore, "LogTaskSubmitted");
 
     // construct a Gelato TaskReceipt needed for canExec and exec testing
-    const taskReceipt = new GelatoCoreLib.TaskReceipt({
+    const taskReceipt = new TaskReceipt({
       id: 1,
       provider: gelatoSelfProvider,
       userProxy: gelatoUserProxyAddress,
@@ -249,9 +250,9 @@ describe("ActionChiMint Local Test Suite", function () {
     await expect(
       gelatoCore.exec(taskReceipt, {
         gasPrice: TRIGGER_GAS_PRICE,
-        gasLimit: bre.ethers.BigNumber.from(
-          taskReceipt.tasks[0].selfProviderGasLimit
-        ).add(30000),
+        gasLimit: utils
+          .bigNumberify(taskReceipt.tasks[0].selfProviderGasLimit)
+          .add(30000),
       })
     ).to.emit(gelatoCore, "LogExecSuccess");
 
