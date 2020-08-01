@@ -1,5 +1,5 @@
 // Libraries
-// const assert = require("assert");
+const assert = require("assert");
 const { utils } = require("ethers");
 
 // Classes
@@ -28,10 +28,10 @@ const getNestedObj = require("./src/helpers/nestedObjects/getNestedObj");
 
 // Process Env Variables
 require("dotenv").config();
-const INFURA_ID = process.env.DEMO_INFURA_ID;
-const USER_PK = process.env.DEMO_USER_PK;
-// // assert.ok(INFURA_ID, "no Infura ID in process.env");
-// // assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
+const INFURA_ID = process.env.INFURA_ID;
+const USER_PK = process.env.USER_PK;
+assert.ok(INFURA_ID, "no Infura ID in process.env");
+assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
 
 // ================================= CONFIG =========================================
 module.exports = {
@@ -57,11 +57,6 @@ module.exports = {
       // Custom
       // Rinkeby: addressBook
       addressBook: {
-        // Rinkeby: erc20s
-        erc20: {
-          CHI: "",
-          "": "CHI",
-        },
         // Rinkeby: Gelato
         gelatoExecutor: {
           default: "0xa5A98a6AD379C7B578bD85E35A3eC28AD72A336b", // PermissionedExecutors
@@ -69,8 +64,6 @@ module.exports = {
       },
       // Rinkeby: Deployments
       deployments: {
-        // ==== Actions ====
-        ActionChiMint: "",
         // ===== Gelato Core ====
         GelatoCore: "0x733aDEf4f8346FD96107d8d6605eA9ab5645d632",
         // === GelatoUserProxies ===

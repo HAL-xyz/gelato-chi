@@ -5,7 +5,9 @@
   "repository": "https://github.com/gelatodigital/gelato-chi",
   "author": "gitpusha",
   "private": false,
-  "scripts": {},
+  "scripts": {
+    "create-proxy": "npx buidler test rinkeby-test/1-create-GnosisSafe-CPK.js --network rinkeby"
+  },
   "devDependencies": {
     "@gelatonetwork/core": "^0.5.1",
     "@gelatonetwork/gelato-user-proxy": "^1.0.0",
@@ -15,6 +17,7 @@
     "@nomiclabs/buidler-waffle": "1.3.5",
     "@openzeppelin/contracts": "3.1.0",
     "chai": "4.2.0",
+    "contract-proxy-kit": "^1.1.1",
     "dotenv": "8.2.0",
     "ethereum-waffle": "2.5.1",
     "ethers": "4.0.47",
