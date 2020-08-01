@@ -2,6 +2,9 @@
 const assert = require("assert");
 const { utils } = require("ethers");
 
+// Contracts
+const GnosisSafe = require("./artifacts/IGnosisSafe.json");
+
 // Classes
 const Action = require("./src/classes/gelato/Action");
 const Condition = require("./src/classes/gelato/Condition");
@@ -82,6 +85,8 @@ module.exports = {
 
 // ================================= BRE extension ==================================
 extendEnvironment((bre) => {
+  // Contracts
+  bre.GnosisSafe = GnosisSafe;
   // Classes
   bre.Action = Action;
   bre.Condition = Condition;
@@ -89,6 +94,8 @@ extendEnvironment((bre) => {
   bre.Task = Task;
   bre.TaskSpec = TaskSpec;
   bre.TaskReceipt = TaskReceipt;
+  // Debug
+  bre.sleep = sleep;
   // Objects/Enums
   bre.Operation = Operation;
   bre.DataFlow = DataFlow;
