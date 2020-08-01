@@ -74,6 +74,8 @@ module.exports = {
         // ===== Provider Modules ====
         ProviderModuleGelatoUserProxy:
           "0x66a35534126B4B0845A2aa03825b95dFaaE88B0C",
+        ProviderModuleGnosisSafeProxy:
+          "0x2661B579243c49988D9eDAf114Bfac5c5E249287",
       },
     },
   },
