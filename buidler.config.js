@@ -34,7 +34,7 @@ assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
 
 // ================================= CONFIG =========================================
 module.exports = {
-  defaultNetwork: "rinkeby",
+  defaultNetwork: "buidlerevm",
   etherscan: {
     // The url for the Etherscan API you want to use.
     // For example, here we're using the one for the Rinkeby test network

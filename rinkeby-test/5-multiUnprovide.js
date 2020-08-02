@@ -19,7 +19,7 @@ const GELATO = bre.network.config.deployments.GelatoCore;
 const PROVIDER_MODULE_GNOSIS =
   bre.network.config.deployments.ProviderModuleGnosisSafeProxy;
 
-describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
+describe("MultiUnprovide on GELATO", function () {
   // No timeout for Mocha due to Rinkeby mining latency
   this.timeout(0);
 
@@ -48,7 +48,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
     // Transaction to deploy your GnosisSafeProxy
     // If we have not deployed our GnosisSafeProxy yet, we deploy it
     try {
-      console.log("\n Sending Transaction to create GnosisSafeProxy!");
+      console.log("\n Fetching GnosisSafeProxy!");
       cpk = await CPK.create({ ethers, signer: myUserWallet });
     } catch (error) {
       console.error("\n proxyDeployment error ❌  \n", error);
@@ -70,7 +70,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
         : true;
 
     if (executorIsAssignedToMe) {
-      console.log("\n Sending tx to unassigni Executor");
+      console.log("\n Sending tx to unassign Executor");
       // Cleanup TX-1:
       try {
         const tx = await cpk.execTransactions([
@@ -143,9 +143,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
         );
 
         const userWalletBalance = await myUserWallet.getBalance();
-        expect(userWalletBalance).to.be.equal(
-          prevUserWalletBalance.add(providedFunds)
-        );
+        expect(userWalletBalance).to.be.gt(prevUserWalletBalance);
         console.log(
           `✅ Funds in UserWallet: ${utils.formatEther(userWalletBalance)} ETH`
         );
@@ -163,7 +161,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
       PROVIDER_MODULE_GNOSIS
     );
     if (moduleIsProvided) {
-      console.log(`\n Unproving ProviderModuleGnosisSafeProxy`);
+      console.log(`\n Removing ProviderModuleGnosisSafeProxy`);
       try {
         const tx = await cpk.execTransactions([
           {

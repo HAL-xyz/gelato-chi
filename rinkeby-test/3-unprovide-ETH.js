@@ -107,9 +107,7 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
       );
 
       const userWalletBalance = await myUserWallet.getBalance();
-      expect(userWalletBalance).to.be.equal(
-        prevUserWalletBalance.add(fundsOnGelato)
-      );
+      expect(userWalletBalance).to.be.gt(prevUserWalletBalance);
       console.log(
         `Funds in UserWallet: ${utils.formatEther(userWalletBalance)} ETH`
       );

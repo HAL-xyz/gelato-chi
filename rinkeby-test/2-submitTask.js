@@ -70,6 +70,9 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
     );
 
     currentGelatoGasPrice = await bre.run("fetchGelatoGasPrice");
+
+    // FOR TESTING WE SET IT EQUAL TO CURRENT SO WE CAN CHECK FOR EXECUTION
+    triggerGasPrice = currentGelatoGasPrice;
   });
 
   // Submit your Task to Gelato via your GelatoUserProxy
@@ -80,139 +83,103 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
     // For our Task to be executable, our Provider must have sufficient funds on Gelato
     const providerIsLiquid = await gelatoCore.isProviderLiquid(
       cpk.address,
-      ethers.utils.bigNumberify("8000000"), // we need roughtly estimatedGasPerExecution * 3 executions as balance on gelato
-      currentGelatoGasPrice
+      SELF_PROVIDER_GAS_LIMIT, // we need roughtly estimatedGasPerExecution * 3 executions as balance on gelato
+      triggerGasPrice
     );
     if (!providerIsLiquid) {
       console.log(
-        "\n ❌  Ooops! Your Provider needs to provide more funds to Gelato \n"
+        "\n ❌  Ooops! Your GnosisSafe needs to provide more funds to Gelato \n"
       );
-      console.log("DEMO: run this command: `yarn provide` first");
+      console.log("DEMO: run this command: `yarn setup-proxy` first");
       process.exit(1);
     }
 
     // For the Demo, make sure the Provider has the Gelato default Executor assigned
     const assignedExecutor = await gelatoCore.executorByProvider(cpk.address);
-    if (assignedExecutor !== defaultExecutor) {
+    if (assignedExecutor !== EXECUTOR) {
       console.log(
-        "\n ❌  Ooops! Your Provider needs to assign the gelato default Executor \n"
+        "\n ❌  Ooops! Your GnosisSafe needs to assign the gelato default Executor \n"
       );
-      console.log("DEMO: run this command: `yarn provide` first");
+      console.log("DEMO: run this command: `yarn setup-proxy` first");
       process.exit(1);
     }
 
     // For the Demo, our Provider must use the deployed ProviderModuleGelatoUserProxy
     const userProxyModuleIsProvided = await gelatoCore.isModuleProvided(
       cpk.address,
-      network.config.deployments.ProviderModuleGelatoUserProxy
+      PROVIDER_MODULE_GNOSIS
     );
     if (!userProxyModuleIsProvided) {
       console.log(
-        "\n ❌  Ooops! Your Provider still needs to add ProviderModuleGelatoUserProxy \n"
+        "\n ❌  Ooops! Your GnosisSafe still needs to add ProviderModuleGelatoUserProxy \n"
       );
-      console.log("DEMO: run this command: `yarn provide` first");
+      console.log("DEMO: run this command: `yarn setup-proxy` first");
       process.exit(1);
     }
 
-    // The single Transaction that deploys your GelatoUserProxy and submits your Task Cycle
+    // The transaction to submit a Task to Gelato
     if (
       providerIsLiquid &&
-      assignedExecutor === defaultExecutor &&
+      assignedExecutor === EXECUTOR &&
       userProxyModuleIsProvided
     ) {
-      // We also want to keep track of token balances in our UserWallet
-      const myUserWalletDAIBalance = await bre.run("erc20-balance", {
-        erc20name: "KNC",
-        owner: myUserAddress,
-      });
-
-      // Since our Proxy will move a total of 3 KNC from our UserWallet to
-      // trade them for ETH and pay the Provider fee, we need to make sure the we
-      // have the KNC balance
-      if (!myUserWalletDAIBalance.gte(3)) {
-        console.log(
-          "\n ❌ Ooops! You need at least 3 KNC in your UserWallet \n"
-        );
-        process.exit(1);
-      }
-
-      // We also monitor the KNC approval our GelatoUserProxy has from us
-      const myUserProxyDAIAllowance = await bre.run("erc20-allowance", {
-        owner: myUserAddress,
-        erc20name: "KNC",
-        spender: myUserProxyAddress,
-      });
-
-      // ###### 1st TX => APPROVE USER PROXY TO MOVE KNC
-
-      // Since our Proxy will move a total of 3 KNC from our UserWallet to
-      // trade them for ETH and pay the Provider fee, we need to make sure the we
-      // that we have approved our UserProxy. We can already approve it before
-      // we have even deployed it, due to create2 address prediction magic.
-      if (!myUserProxyDAIAllowance.gte(utils.parseUnits("3", 18))) {
-        try {
-          console.log("\n Sending Transaction to approve UserProxy for KNC.");
-          console.log("\n Waiting for KNC Approval Tx to be mined....");
-          await bre.run("erc20-approve", {
-            erc20name: "KNC",
-            amount: utils.parseUnits("3", 18).toString(),
-            spender: myUserProxyAddress,
-          });
-          console.log(
-            "\n Gelato User Proxy now has your Approval to move 3 KNC  ✅ \n"
-          );
-        } catch (error) {
-          console.error("\n UserProxy KNC Approval failed ❌  \n", error);
-          process.exit(1);
-        }
-      } else {
-        console.log(
-          "\n Gelato User Proxy already has your Approval to move 3 KNC  ✅ \n"
-        );
-      }
-
       // To submit Tasks to  Gelato we need to instantiate a GelatoProvider object
       const myGelatoProvider = new GelatoProvider({
         addr: cpk.address, // This time, the provider is paying for the Task, hence we input the Providers address
-        module: network.config.deployments.ProviderModuleGelatoUserProxy,
+        module: PROVIDER_MODULE_GNOSIS,
       });
 
-      // We should also specify an expiryDate for our Task Cycle
-      // Since we want to trade 3 times every 2 minutes, something like 15 minutes from
-      //  now should be reasonably safe in case of higher network latency.
-      // You can also simply input 0 to not have an expiry date
-      const nowInSeconds = Math.floor(Date.now() / 1000);
-      const expiryDate = nowInSeconds + 900; // 15 minutes from now
+      let actionChiMint = await deployments.get("ActionChiMint");
+      actionChiMint = await bre.ethers.getContractAt(
+        actionChiMint.abi,
+        actionChiMint.address
+      );
 
-      // ###### 2nd TX => Submit Task to gelato
+      // Specify and Instantiate the Gelato Task
+      const taskAutoMintCHIWhenTriggerGasPrice = new Task({
+        actions: [
+          new Action({
+            addr: actionChiMint.address,
+            data: await actionChiMint.getActionData(
+              myUserAddress, // recipient of CHI Tokens
+              CHI_TOKENS_MAX // CHI Tokens to be minted
+            ),
+            operation: GelatoCoreLib.Operation.Delegatecall,
+            termsOkCheck: true,
+          }),
+        ],
+        selfProviderGasLimit: SELF_PROVIDER_GAS_LIMIT,
+        // This makes sure we only mint CHI when the gelatoGasPrice is at or below
+        // our desired trigger gas price
+        selfProviderGasPriceCeil: triggerGasPrice,
+      });
 
-      // We Submit our Task as a "Task Cycle" with 3 cycles to limit the number
-      // of total Task executions to three.
-      let taskSubmissionTx;
+      // Specify ExpiryDate: 0 for infinite validity
+      const EXPIRY_DATE = 0;
+
+      // Submit Task to gelato
       try {
-        console.log("\n Sending Transaction to submit Task!");
-        taskSubmissionTx = await myUserProxy.execActionsAndSubmitTaskCycle(
-          [actionUpdateConditionTime], // setup the Time Condition for first trade in 2 mins
-          myGelatoProvider,
-          [taskTradeOnKyber], // we only have one type of Task
-          expiryDate, // auto-cancel if not completed in 15 minutes from now
-          3, // the num of times we want our Task to be executed: 3 times every 2 minutes
+        const tx = await cpk.execTransactions([
           {
-            gasLimit: 1000000,
-            gasPrice: utils.parseUnits("10", "gwei"),
-          }
-        );
+            operation: CPK.CALL,
+            to: GELATO,
+            value: 0,
+            data: await bre.run("abi-encode-withselector", {
+              abi: GelatoCoreLib.GelatoCore.abi,
+              functionname: "submitTask",
+              inputs: [
+                myGelatoProvider,
+                taskAutoMintCHIWhenTriggerGasPrice,
+                EXPIRY_DATE,
+              ],
+            }),
+          },
+        ]);
+        // Wait for mining
+        console.log(`SubmitTask Tx Hash: ${tx.hash}`);
+        await tx.transactionResponse.wait();
       } catch (error) {
         console.error("\n PRE taskSubmissionTx error ❌  \n", error);
-        process.exit(1);
-      }
-      try {
-        console.log("\n Waiting for taskSubmissionTx to get mined...");
-        await taskSubmissionTx.wait();
-        console.log(`\n Task with provider ${cpk.address} Submitted ✅ \n`);
-        console.log("\n Task will be executed a total of 3 times \n");
-      } catch (error) {
-        console.error("\n POST taskSubmissionTx error ❌ ", error);
         process.exit(1);
       }
     }
