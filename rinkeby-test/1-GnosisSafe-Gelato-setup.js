@@ -17,7 +17,6 @@ const GelatoCoreLib = require("@gelatonetwork/core");
 
 const GELATO = bre.network.config.deployments.GelatoCore;
 const EXECUTOR = bre.network.config.addressBook.gelatoExecutor.default;
-console.log(EXECUTOR);
 const PROVIDER_MODULE_GNOSIS =
   bre.network.config.deployments.ProviderModuleGnosisSafeProxy;
 
