@@ -359,12 +359,12 @@
     "@ethersproject/properties" "^5.0.0"
     "@ethersproject/strings" "^5.0.0"
 
-"@gelatonetwork/core@^0.5.1":
+"@gelatonetwork/core@0.5.1":
   version "0.5.1"
   resolved "https://registry.yarnpkg.com/@gelatonetwork/core/-/core-0.5.1.tgz#ec72378603021b388146548a7cda8362082a7604"
   integrity sha512-mUwK8a2PJjD5EgB/D1b4R9DzH5ZQGKZRDHlIYSpaXhPJoL4tlbDHrSBUOJudcmQdkxVut7jmb0Wp10T7pwzOnA==
 
-"@gelatonetwork/gelato-user-proxy@^1.0.0":
+"@gelatonetwork/gelato-user-proxy@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@gelatonetwork/gelato-user-proxy/-/gelato-user-proxy-1.0.0.tgz#a38d4a0dbe482b53459fbd9b0dd5f5dadf4b2296"
   integrity sha512-J/XNDeUVdDfhix5php00o9Z7GMyUgr6qEv/YRbhQLi2HPZBdBAjNFk6t7fJjxFxSDf05i4k+WP0IsMKX2150wA==
@@ -374,7 +374,7 @@
   resolved "https://registry.yarnpkg.com/@nomiclabs/buidler-ethers/-/buidler-ethers-1.3.4.tgz#3f200e1ef5843f844a356fe00d1d11685218817c"
   integrity sha512-kz2YtkQl/eUuNkYpZqj1xtkDpzy+2AdUNc9xfmvU/zEf0HL0eOsj+a9Ltvl2xhL86eTaYbfrIzJvWGmpIJndNA==
 
-"@nomiclabs/buidler-etherscan@^1.3.3":
+"@nomiclabs/buidler-etherscan@1.3.3":
   version "1.3.3"
   resolved "https://registry.yarnpkg.com/@nomiclabs/buidler-etherscan/-/buidler-etherscan-1.3.3.tgz#a7cbba220c7ad88ae04f26440e1f7236569db145"
   integrity sha512-Pmo890t8ZvO9/9Q+9uxQl7SLai6Sqp8m5CdUc4MWO/YIIsv6dt1+68VaUDOhkF5+xwUDgp89Cdu0fJp4PODsxw==
@@ -1959,10 +1959,10 @@ buffer@^5.0.5, buffer@^5.2.1, buffer@^5.6.0:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-buidler-deploy@^0.5.8:
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.8.tgz#850830890bc4c97835ec88848065df3e6f8b2f69"
-  integrity sha512-M9A1VTV6iRfqcB4Qsc6vF83KFMM6e6sa2QvgaDFQw2zIxx3R3kT4bthyRUMYsbJPCo8sbhdBSgviDTjjJY5eCQ==
+buidler-deploy@0.5.9:
+  version "0.5.9"
+  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.9.tgz#122f15a598806fad6fe659d43e68e2b103d3517e"
+  integrity sha512-yMvcJUi01zdRiszeBAsye77szWY/5lXNzaN3clZclM+o1k+Y3gXtrr/CjCjEZdghggxEAR1TI7BDThOo5xkSSQ==
   dependencies:
     "@ethersproject/abi" "^5.0.2"
     "@ethersproject/abstract-signer" "^5.0.2"
@@ -2373,7 +2373,7 @@ content-type@~1.0.4:
   resolved "https://registry.yarnpkg.com/content-type/-/content-type-1.0.4.tgz#e138cc75e040c727b1966fe5e5f8c9aee256fe3b"
   integrity sha512-hIP3EEPs8tB9AT1L+NUqtwOAps4mk2Zob89MWXMHjHWg9milF/j4osnnQLXBCBFBk/tvIG/tUc9mOUJiPBhPXA==
 
-contract-proxy-kit@^1.1.1:
+contract-proxy-kit@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/contract-proxy-kit/-/contract-proxy-kit-1.1.1.tgz#17700eebc91a9140da0e106f51a234ee5e335412"
   integrity sha512-Tm0LSoMDrd8QFTqCahju3hNzMGFvrPz28HnuObbT9CeFVLSKhTSZmxYuftiz2zV+KzL1Ji83TgLsC7CIw0fJJA==

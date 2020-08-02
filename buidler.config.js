@@ -1,6 +1,7 @@
 // Libraries
 const assert = require("assert");
 const { utils } = require("ethers");
+const GelatoCoreLib = require("@gelatonetwork/core");
 
 // Contracts
 const GnosisSafe = require("./artifacts/IGnosisSafe.json");
@@ -20,11 +21,6 @@ const DataFlow = require("./src/enums/gelato/DataFlow");
 // Helpers
 // Async
 const sleep = require("./src/helpers/async/sleep");
-// Gelato
-const convertTaskReceiptArrayToObj = require("./src/helpers/gelato/convertTaskReceiptArrayToObj");
-const convertTaskReceiptObjToArray = require("./src/helpers/gelato/convertTaskReceiptObjToArray");
-// Nested Arrays
-const nestedArraysAreEqual = require("./src/helpers/nestedArrays/nestedArraysAreEqual");
 // Nested Objects
 const checkNestedObj = require("./src/helpers/nestedObjects/checkNestedObj");
 const getNestedObj = require("./src/helpers/nestedObjects/getNestedObj");
@@ -38,7 +34,7 @@ assert.ok(USER_PK, "no User private key (USER_PK) found in .env");
 
 // ================================= CONFIG =========================================
 module.exports = {
-  defaultNetwork: "buidlerevm",
+  defaultNetwork: "rinkeby",
   etherscan: {
     // The url for the Etherscan API you want to use.
     // For example, here we're using the one for the Rinkeby test network
@@ -101,12 +97,6 @@ extendEnvironment((bre) => {
   // Objects/Enums
   bre.Operation = Operation;
   bre.DataFlow = DataFlow;
-  // Functions
-  // Gelato
-  bre.convertTaskReceiptArrayToObj = convertTaskReceiptArrayToObj;
-  bre.convertTaskReceiptObjToArray = convertTaskReceiptObjToArray;
-  // Nested Arrays
-  bre.nestedArraysAreEqual = nestedArraysAreEqual;
   // Nested Objects
   bre.checkNestedObj = checkNestedObj;
   bre.getNestedObj = getNestedObj;
@@ -169,6 +159,50 @@ task("abi-encode-withselector")
       return payloadWithSelector;
     } catch (err) {
       console.error(err);
+      process.exit(1);
+    }
+  });
+
+task(
+  "fetchGelatoGasPrice",
+  `Returns the current gelato gas price used for calling canExec and exec`
+)
+  .addOptionalParam("gelatocoreaddress")
+  .addFlag("log", "Logs return values to stdout")
+  .setAction(async (taskArgs) => {
+    try {
+      const gelatoCore = await ethers.getContractAt(
+        GelatoCoreLib.GelatoCore.abi,
+        taskArgs.gelatocoreaddress
+          ? taskArgs.gelatocoreaddress
+          : network.config.deployments.GelatoCore
+      );
+
+      const oracleAbi = ["function latestAnswer() view returns (int256)"];
+
+      const gelatoGasPriceOracleAddress = await gelatoCore.gelatoGasPriceOracle();
+
+      // Get gelatoGasPriceOracleAddress
+      const gelatoGasPriceOracle = await ethers.getContractAt(
+        oracleAbi,
+        gelatoGasPriceOracleAddress
+      );
+
+      // lastAnswer is used by GelatoGasPriceOracle as well as the Chainlink Oracle
+      const gelatoGasPrice = await gelatoGasPriceOracle.latestAnswer();
+
+      if (taskArgs.log) {
+        console.log(
+          `\ngelatoGasPrice: ${utils.formatUnits(
+            gelatoGasPrice.toString(),
+            "gwei"
+          )} gwei\n`
+        );
+      }
+
+      return gelatoGasPrice;
+    } catch (error) {
+      console.error(error, "\n");
       process.exit(1);
     }
   });
