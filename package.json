@@ -8,7 +8,8 @@
   "scripts": {
     "setup-proxy": "npx buidler test rinkeby-test/1-GnosisSafe-Gelato-setup.js --network rinkeby",
     "withdraw-from-gelato": "npx buidler test rinkeby-test/3-unprovide-ETH.js --network rinkeby",
-    "transfer-from-gnosis-safe": "npx buidler test rinkeby-test/4-transfer-funds-from-GnosisSafe.js --network rinkeby"
+    "transfer-from-gnosis-safe": "npx buidler test rinkeby-test/4-transfer-funds-from-GnosisSafe.js --network rinkeby",
+    "multi-unprovide": "npx buidler test rinkeby-test/5-multiUnprovide.js --network rinkeby"
   },
   "devDependencies": {
     "@gelatonetwork/core": "^0.5.1",

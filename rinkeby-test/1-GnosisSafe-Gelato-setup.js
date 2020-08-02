@@ -20,7 +20,7 @@ const EXECUTOR = bre.network.config.addressBook.gelatoExecutor.default;
 const PROVIDER_MODULE_GNOSIS =
   bre.network.config.deployments.ProviderModuleGnosisSafeProxy;
 
-const FUNDS_TO_DEPOSIT = utils.parseEther("0.1");
+const FUNDS_TO_DEPOSIT = utils.parseEther("1");
 
 describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
   // No timeout for Mocha due to Rinkeby mining latency
@@ -88,7 +88,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
           ]);
 
           // Wait for mining
-          await tx.wait();
+          await tx.transactionResponse.wait();
 
           // Success!
           enabledModules = await gnosisSafe.getModules();
@@ -124,6 +124,12 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
       if (isDefaultExecutorAssigned)
         console.log("\n ✅Default Executor ALREADY assigned");
 
+      const isExecutorValid = await gelatoCore.isExecutorMinStaked(EXECUTOR);
+      if (!isExecutorValid) {
+        console.error("❌ Executor is not minStaked");
+        process.exit(1);
+      }
+
       // If the user wants to use Gelato through their GnosisSafe, he needs to register the ProviderModuleGnosisSafeProxy to make his GnosisSafe compatible with Gelato
 
       // Here we check if the User already enabled the ProviderModuleGnosisSafeProxy.
@@ -136,36 +142,53 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
       if (isUserProxyModuleWhitelisted)
         console.log("\n ✅ UserProxyModule ALREADY whitelisted");
 
-      // Providing Funds
+      // Providing Funds: We have to do this in separate TX
+      // because CPK might use GnosisSafe with non-payable execTransaction fn
+      // => we cannot send funds along with TX but have to pre-deposit them into
+      // our GnosisSafe, in order for CPK.execTransactions to be able to use
+      // the `value:` field
       console.log("Providing Funds to UserProxy Provider balance");
-      await gelatoCore.provideFunds(gnosisSafe.address, {
-        value: FUNDS_TO_DEPOSIT,
-      });
-      expect(await gelatoCore.provideFunds(gnosisSafe.address)).to.be.gte(
-        FUNDS_TO_DEPOSIT
+      const currentProviderFunds = await gelatoCore.providerFunds(
+        gnosisSafe.address
       );
+      const fundsAlreadyProvided = currentProviderFunds.gt(0);
+      if (fundsAlreadyProvided) {
+        console.log(
+          `\n ✅ Already provided ${utils.formatEther(
+            currentProviderFunds
+          )} ETH on Gelato`
+        );
+      } else {
+        console.log("Sending tx to provide funds to Gelato");
+        const tx = await gelatoCore.provideFunds(gnosisSafe.address, {
+          value: FUNDS_TO_DEPOSIT,
+        });
+        await tx.wait();
+        expect(await gelatoCore.providerFunds(gnosisSafe.address)).to.be.gte(
+          FUNDS_TO_DEPOSIT
+        );
+        console.log(
+          `✅ Deposited ${utils.formatEther(FUNDS_TO_DEPOSIT)} ETH on gelato`
+        );
+        console.log(
+          `Funds on Gelato: ${utils.formatEther(
+            await gelatoCore.providerFunds(gnosisSafe.address)
+          )} ETH`
+        );
+      }
 
-      /*
-      Function that the User Proxy should call:
-        gelatoCore.multiProvide(
-          address _executor,
-          TaskSpec[] memory _taskSpecs,
-          IGelatoProviderModule[] memory _modules
-        )
-      */
-
-      // The single Transaction that 1) Deposits ETH on gelato, 2) selects the default gelato execution network and 3) tells gelato you are a GnosisSafe
-      let tx;
+      // The single Transaction selects the default gelato execution network and 3) tells gelato you are a GnosisSafe
       if (!isDefaultExecutorAssigned || !isUserProxyModuleWhitelisted) {
         try {
           console.log(
             "\n Sending Transaction to setup UserProxy as SelfProvider"
           );
-          tx = await cpk.execTransactions([
+
+          const tx = await cpk.execTransactions([
             {
               to: GELATO,
               operation: CPK.CALL,
-              value: "0",
+              value: 0, // execTransaction not payable depending on GnosisSafe version
               data: await bre.run("abi-encode-withselector", {
                 abi: GelatoCoreLib.GelatoCore.abi,
                 functionname: "multiProvide",
@@ -179,19 +202,24 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
           ]);
 
           // Wait for mining
-          await tx.wait();
+          await tx.transactionResponse.wait();
 
           // Success
           console.log("\nUser Proxy succesfully set up ✅ \n");
           console.log("TX:", tx.hash);
-          console.log(`
-            \n Deposited ${utils.formatEther(FUNDS_TO_DEPOSIT)} ETH on gelato
-            \n Selected default execution network: ${EXECUTOR}
-            \n Whitelisted following provider module: ${PROVIDER_MODULE_GNOSIS} \n`);
+          if (!isDefaultExecutorAssigned)
+            console.log(`Selected default execution network: ${EXECUTOR}`);
+          if (!isUserProxyModuleWhitelisted) {
+            console.log(
+              `Whitelisted following provider module: ${PROVIDER_MODULE_GNOSIS}`
+            );
+          }
         } catch (error) {
           console.error("\n Gelato UserProxy Setup Error ❌  \n", error);
           process.exit(1);
         }
+      } else {
+        console.log("\n✅ UserProxy ALREADY fully set up on Gelato \n");
       }
     });
   });

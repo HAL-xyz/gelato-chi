@@ -60,10 +60,10 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
       `Current funds on Gelato: ${utils.formatEther(fundsOnGelato)} ETH`
     );
 
-    const prevFundsInUserProxy = await ethers.provider.getBalance(cpk.address);
+    const prevUserWalletBalance = await myUserWallet.getBalance();
     console.log(
-      `Current funds in GnosisSafe: ${utils.formatEther(
-        prevFundsInUserProxy
+      `Current funds in User Wallet: ${utils.formatEther(
+        prevUserWalletBalance
       )} ETH`
     );
 
@@ -74,7 +74,9 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
       process.exit(1);
     }
 
-    console.log(`\n Withdrawing ${utils.formatEther(fundsOnGelato)} ETH`);
+    console.log(
+      `\n Withdrawing ${utils.formatEther(fundsOnGelato)} ETH to userWallet`
+    );
     try {
       const tx = await cpk.execTransactions([
         {
@@ -95,7 +97,7 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
         },
       ]);
       // Wait for mining
-      // await tx.wait()  <==== somehow this doesnt work
+      await tx.transactionResponse.wait();
       console.log(`Tx Hash: ${tx.hash}`);
 
       const newFundsOnGelato = await gelatoCore.providerFunds(cpk.address);
@@ -104,10 +106,12 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
         `New funds in Gelato: ${utils.formatEther(newFundsOnGelato)} ETH`
       );
 
-      const fundsInUserProxy = await ethers.provider.getBalance(cpk.address);
-      expect(fundsInUserProxy).to.be.equal(prevFundsInUserProxy);
+      const userWalletBalance = await myUserWallet.getBalance();
+      expect(userWalletBalance).to.be.equal(
+        prevUserWalletBalance.add(fundsOnGelato)
+      );
       console.log(
-        `Funds in GnosisSafe: ${utils.formatEther(fundsInUserProxy)} ETH`
+        `Funds in UserWallet: ${utils.formatEther(userWalletBalance)} ETH`
       );
     } catch (error) {
       console.error("\n Gelato unprovideFunds error ❌  \n", error);

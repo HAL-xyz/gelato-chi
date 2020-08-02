@@ -74,6 +74,7 @@ describe("Transfering ETH out of GnosisSafe", function () {
       ]);
       // Wait for mining
       console.log(`Tx Hash: ${tx.hash}`);
+      await tx.transactionResponse.wait();
 
       const fundsInUserProxy = await ethers.provider.getBalance(cpk.address);
       expect(fundsInUserProxy).to.be.equal(0);
