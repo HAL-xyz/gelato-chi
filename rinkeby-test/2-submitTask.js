@@ -72,9 +72,10 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
     );
 
     currentGelatoGasPrice = await bre.run("fetchGelatoGasPrice");
+    console.log(`Current Price: ${currentGelatoGasPrice.toString()}`);
 
-    // FOR TESTING WE SET IT EQUAL TO CURRENT SO WE CAN CHECK FOR EXECUTION
-    triggerGasPrice = currentGelatoGasPrice;
+    triggerGasPrice = currentGelatoGasPrice.sub(utils.parseUnits("4", "Gwei"));
+    console.log(`Trigger Price: ${triggerGasPrice.toString()}`);
   });
 
   // Submit your Task to Gelato via your GelatoUserProxy
