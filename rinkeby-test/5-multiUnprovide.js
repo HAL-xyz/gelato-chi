@@ -45,7 +45,7 @@ describe("MultiUnprovide on GELATO", function () {
     // Create CPK instance connected to new mastercopy
     cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
-    const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
+    const codeAtProxy = await bre.ethers.provider.getCode(cpk.address);
     const proxyDeployed = codeAtProxy === "0x" ? false : true;
 
     console.log(`

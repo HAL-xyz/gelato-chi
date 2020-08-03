@@ -47,7 +47,7 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
     cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
 
-    const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
+    const codeAtProxy = await bre.ethers.provider.getCode(cpk.address);
     proxyIsDeployed = codeAtProxy === "0x" ? false : true;
 
     console.log(`

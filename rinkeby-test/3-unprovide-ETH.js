@@ -41,7 +41,7 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
     cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
 
-    const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
+    const codeAtProxy = await bre.ethers.provider.getCode(cpk.address);
     const proxyDeployed = codeAtProxy === "0x" ? false : true;
 
     console.log(`
