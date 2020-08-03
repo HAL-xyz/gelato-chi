@@ -50,6 +50,11 @@ describe("Unproviding ETH deposited on Gelato via GnosisSafe", function () {
       \n Proxy deployed?:  ${proxyDeployed}\n
     `);
 
+    if (proxyDeployed === false) {
+      console.error("Need `yarn setup-proxy` first");
+      process.exit(1);
+    }
+
     gelatoCore = await ethers.getContractAt(
       GelatoCoreLib.GelatoCore.abi,
       network.config.deployments.GelatoCore // the Rinkeby Address of the deployed GelatoCore

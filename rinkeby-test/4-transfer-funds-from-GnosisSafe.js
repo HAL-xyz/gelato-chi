@@ -43,6 +43,11 @@ describe("Transfering ETH out of GnosisSafe", function () {
       \n CPK Proxy address: ${cpk.address}\
       \n Proxy deployed?:  ${proxyDeployed}\n
     `);
+
+    if (proxyDeployed === false) {
+      console.error("Need `yarn setup-proxy` first");
+      process.exit(1);
+    }
   });
 
   it("Transfer funds from GnosisSafe", async function () {

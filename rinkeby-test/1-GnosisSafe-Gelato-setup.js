@@ -36,6 +36,8 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
   let cpk;
   let gnosisSafe;
 
+  let proxyIsDeployed;
+
   before(async function () {
     // We get our User Wallet from the Buidler Runtime Env
     [myUserWallet] = await bre.ethers.getSigners();
@@ -44,24 +46,31 @@ describe("Create a GnosisSafe via CPK and setup with Gelato", function () {
     // Create CPK instance connected to new mastercopy
     cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
-    gnosisSafe = await bre.ethers.getContractAt("IGnosisSafe", cpk.address);
 
     const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
-    const proxyDeployed = codeAtProxy === "0x" ? false : true;
+    proxyIsDeployed = codeAtProxy === "0x" ? false : true;
 
     console.log(`
       \n Network:           ${bre.network.name}\
       \n CPK Proxy address: ${cpk.address}\
-      \n Proxy deployed?:  ${proxyDeployed}\n
+      \n Proxy deployed?:   ${proxyIsDeployed}\n
     `);
   });
 
   it("Whitelists GelatoCore as a GnosisSafe module and sets up Gelato", async function () {
-    let enabledModules = await gnosisSafe.getModules();
-    let gelato = enabledModules.find((element) => element === GELATO);
-    let gelatoIsWhitelisted = gelato ? true : false;
+    let gelatoIsWhitelisted = false;
+    let enabledModules = [];
+    if (proxyIsDeployed) {
+      gnosisSafe = await bre.ethers.getContractAt("IGnosisSafe", cpk.address);
+      //console.log(await cpk.getOwnerAccount());
+      //console.log(await gnosisSafe.getOwners());
+      enabledModules = await gnosisSafe.getModules();
+      // console.log(enabledModules);
+      let gelato = enabledModules.find((element) => element === GELATO);
+      gelatoIsWhitelisted = gelato ? true : false;
+    }
 
-    if (!gelatoIsWhitelisted) {
+    if (gelatoIsWhitelisted === false) {
       try {
         console.log("\n Sending Transaction to whitelist GelatoCore module!");
         const tx = await cpk.execTransactions([

@@ -45,8 +45,6 @@ describe("MultiUnprovide on GELATO", function () {
     // Create CPK instance connected to new mastercopy
     cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
-    gnosisSafe = await bre.ethers.getContractAt("IGnosisSafe", cpk.address);
-
     const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
     const proxyDeployed = codeAtProxy === "0x" ? false : true;
 
@@ -55,6 +53,11 @@ describe("MultiUnprovide on GELATO", function () {
       \n CPK Proxy address: ${cpk.address}\
       \n Proxy deployed?:  ${proxyDeployed}\n
     `);
+
+    if (proxyDeployed === false) {
+      console.error("Need `yarn setup-proxy` first");
+      process.exit(1);
+    }
   });
 
   it("Unprovide everything: Executor, Funds, ProviderModule", async function () {
