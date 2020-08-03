@@ -359,10 +359,10 @@
     "@ethersproject/properties" "^5.0.0"
     "@ethersproject/strings" "^5.0.0"
 
-"@gelatonetwork/core@0.5.1":
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/@gelatonetwork/core/-/core-0.5.1.tgz#ec72378603021b388146548a7cda8362082a7604"
-  integrity sha512-mUwK8a2PJjD5EgB/D1b4R9DzH5ZQGKZRDHlIYSpaXhPJoL4tlbDHrSBUOJudcmQdkxVut7jmb0Wp10T7pwzOnA==
+"@gelatonetwork/core@0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@gelatonetwork/core/-/core-0.5.3.tgz#8193c25cc4a91aca08c4cdb4d6fc38459902065d"
+  integrity sha512-yZXpuFLMXY8gFI14S1CPelrYmRJCOq5hy6J5hI8/yov9Ksi9kTSL9iAyxbA+HdP1BEKQBucB5vneEFqFC6PD4Q==
 
 "@gelatonetwork/gelato-user-proxy@1.0.0":
   version "1.0.0"

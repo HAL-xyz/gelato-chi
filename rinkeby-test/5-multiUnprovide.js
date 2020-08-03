@@ -42,24 +42,19 @@ describe("MultiUnprovide on GELATO", function () {
       GelatoCoreLib.GelatoCore.abi,
       network.config.deployments.GelatoCore // the Rinkeby Address of the deployed GelatoCore
     );
-  });
-
-  it("Fetches Users' GnosisSafeProxy", async function () {
-    // Transaction to deploy your GnosisSafeProxy
-    // If we have not deployed our GnosisSafeProxy yet, we deploy it
-    try {
-      console.log("\n Fetching GnosisSafeProxy!");
-      cpk = await CPK.create({ ethers, signer: myUserWallet });
-    } catch (error) {
-      console.error("\n proxyDeployment error ❌  \n", error);
-      process.exit(1);
-    }
-
+    // Create CPK instance connected to new mastercopy
+    cpk = await CPK.create({ ethers, signer: myUserWallet });
     expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
+    gnosisSafe = await bre.ethers.getContractAt("IGnosisSafe", cpk.address);
 
-    console.log(
-      `CPK Proxy is deployed at ${cpk.address} on ${bre.network.name}`
-    );
+    const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
+    const proxyDeployed = codeAtProxy === "0x" ? false : true;
+
+    console.log(`
+      \n Network:           ${bre.network.name}\
+      \n CPK Proxy address: ${cpk.address}\
+      \n Proxy deployed?:  ${proxyDeployed}\n
+    `);
   });
 
   it("Unprovide everything: Executor, Funds, ProviderModule", async function () {

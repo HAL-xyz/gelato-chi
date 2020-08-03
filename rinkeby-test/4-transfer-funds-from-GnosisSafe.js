@@ -30,17 +30,19 @@ describe("Transfering ETH out of GnosisSafe", function () {
     // We get our User Wallet from the Buidler Runtime Env
     [myUserWallet] = await bre.ethers.getSigners();
     myUserAddress = await myUserWallet.getAddress();
-    try {
-      console.log("\n Fetching GnosisSafeProxy or creating if none!");
-      cpk = await CPK.create({ ethers, signer: myUserWallet });
-      expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
-      console.log(
-        `CPK Proxy is deployed at ${cpk.address} on ${bre.network.name}`
-      );
-    } catch (error) {
-      console.error("\n CPK.create error ❌  \n", error);
-      process.exit(1);
-    }
+
+    // Create CPK instance connected to new mastercopy
+    cpk = await CPK.create({ ethers, signer: myUserWallet });
+    expect(await cpk.getOwnerAccount()).to.be.equal(myUserAddress);
+
+    const codeAtProxy = bre.ethers.provider.getCode(cpk.address);
+    const proxyDeployed = codeAtProxy === "0x" ? false : true;
+
+    console.log(`
+      \n Network:           ${bre.network.name}\
+      \n CPK Proxy address: ${cpk.address}\
+      \n Proxy deployed?:  ${proxyDeployed}\n
+    `);
   });
 
   it("Transfer funds from GnosisSafe", async function () {
