@@ -147,7 +147,7 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
               CHI_TOKENS_MAX // CHI Tokens to be minted
             ),
             operation: GelatoCoreLib.Operation.Delegatecall,
-            termsOkCheck: true,
+            termsOkCheck: false,
           }),
         ],
         selfProviderGasLimit: SELF_PROVIDER_GAS_LIMIT,
