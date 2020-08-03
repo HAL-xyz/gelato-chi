@@ -126,7 +126,7 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
       userProxyModuleIsProvided
     ) {
       // To submit Tasks to  Gelato we need to instantiate a GelatoProvider object
-      const myGelatoProvider = new GelatoProvider({
+      const myGelatoProvider = new GelatoCoreLib.GelatoProvider({
         addr: cpk.address, // This time, the provider is paying for the Task, hence we input the Providers address
         module: PROVIDER_MODULE_GNOSIS,
       });
@@ -138,9 +138,9 @@ describe("Submitting ActionCHIMint Task to Gelato via GnosisSafe", function () {
       );
 
       // Specify and Instantiate the Gelato Task
-      const taskAutoMintCHIWhenTriggerGasPrice = new Task({
+      const taskAutoMintCHIWhenTriggerGasPrice = new GelatoCoreLib.Task({
         actions: [
-          new Action({
+          new GelatoCoreLib.Action({
             addr: actionChiMint.address,
             data: await actionChiMint.getActionData(
               myUserAddress, // recipient of CHI Tokens

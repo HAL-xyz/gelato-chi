@@ -140,7 +140,7 @@ describe("ActionChiMint Local Test Suite", function () {
     // 1) We assign our testUserAddress as Executor for test simulation
     // 2) We whitelist providerModuleGelatoUserProxy as our SelfProvider module
     // 3) We depost funds on GelatoCore to pay for automated CHI minting later
-    const selfProviderSetupAction = new Action({
+    const selfProviderSetupAction = new GelatoCoreLib.Action({
       addr: gelatoCore.address,
       data: await bre.run("abi-encode-withselector", {
         abi: GelatoCoreLib.GelatoCore.abi,
@@ -168,15 +168,15 @@ describe("ActionChiMint Local Test Suite", function () {
     await actionChiMint.deployed();
 
     // Instantiate GelatoProvider type for our SelfProvider
-    gelatoSelfProvider = new GelatoProvider({
+    gelatoSelfProvider = new GelatoCoreLib.GelatoProvider({
       addr: gelatoUserProxyAddress,
       module: providerModuleGelatoUserProxy.address,
     });
 
     // Specify and Instantiate the Gelato Task
-    taskAutoMintWhenTriggerGasPrice = new Task({
+    taskAutoMintWhenTriggerGasPrice = new GelatoCoreLib.Task({
       actions: [
-        new Action({
+        new GelatoCoreLib.Action({
           addr: actionChiMint.address,
           data: await actionChiMint.getActionData(
             testUserAddress, // recipient of CHI Tokens
@@ -203,7 +203,7 @@ describe("ActionChiMint Local Test Suite", function () {
     ).to.emit(gelatoCore, "LogTaskSubmitted");
 
     // construct a Gelato TaskReceipt needed for canExec and exec testing
-    const taskReceipt = new TaskReceipt({
+    const taskReceipt = new GelatoCoreLib.TaskReceipt({
       id: 1,
       provider: gelatoSelfProvider,
       userProxy: gelatoUserProxyAddress,

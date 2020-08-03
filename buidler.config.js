@@ -6,25 +6,6 @@ const GelatoCoreLib = require("@gelatonetwork/core");
 // Contracts
 const GnosisSafe = require("./artifacts/IGnosisSafe.json");
 
-// Classes
-const Action = require("./src/classes/gelato/Action");
-const Condition = require("./src/classes/gelato/Condition");
-const GelatoProvider = require("./src/classes/gelato/GelatoProvider");
-const Task = require("./src/classes/gelato/Task");
-const TaskSpec = require("./src/classes/gelato/TaskSpec");
-const TaskReceipt = require("./src/classes/gelato/TaskReceipt");
-
-// Objects/Enums
-const Operation = require("./src/enums/gelato/Operation");
-const DataFlow = require("./src/enums/gelato/DataFlow");
-
-// Helpers
-// Async
-const sleep = require("./src/helpers/async/sleep");
-// Nested Objects
-const checkNestedObj = require("./src/helpers/nestedObjects/checkNestedObj");
-const getNestedObj = require("./src/helpers/nestedObjects/getNestedObj");
-
 // Process Env Variables
 require("dotenv").config();
 const INFURA_ID = process.env.INFURA_ID;
@@ -85,21 +66,8 @@ module.exports = {
 extendEnvironment((bre) => {
   // Contracts
   bre.GnosisSafe = GnosisSafe;
-  // Classes
-  bre.Action = Action;
-  bre.Condition = Condition;
-  bre.GelatoProvider = GelatoProvider;
-  bre.Task = Task;
-  bre.TaskSpec = TaskSpec;
-  bre.TaskReceipt = TaskReceipt;
-  // Debug
-  bre.sleep = sleep;
-  // Objects/Enums
-  bre.Operation = Operation;
-  bre.DataFlow = DataFlow;
-  // Nested Objects
-  bre.checkNestedObj = checkNestedObj;
-  bre.getNestedObj = getNestedObj;
+  // Libraries
+  bre.GelatoCoreLib = GelatoCoreLib;
 });
 
 // ================================= PLUGINS =========================================
@@ -133,8 +101,14 @@ task("abi-encode-withselector")
 
       const interFace = new utils.Interface(taskArgs.abi);
 
-      if (!checkNestedObj(interFace, "functions", taskArgs.functionname))
-        throw new Error("\nfunctionname is not on contract's interface");
+      // if (
+      //   !GelatoCoreLib.checkNestedObj(
+      //     interFace,
+      //     "functions",
+      //     taskArgs.functionname
+      //   )
+      // )
+      //   throw new Error("\nfunctionname is not on contract's interface");
 
       let payloadWithSelector;
 
