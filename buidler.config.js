@@ -55,6 +55,32 @@ module.exports = {
           "0x2661B579243c49988D9eDAf114Bfac5c5E249287",
       },
     },
+    mainnet: {
+      // Standard
+      accounts: USER_PK ? [USER_PK] : [],
+      chainId: 1,
+      url: `https://mainnet.infura.io/v3/${INFURA_ID}`,
+      // Custom
+      // Mainnet: addressBook
+      addressBook: {
+        // Mainnet: Gelato
+        gelatoExecutor: {
+          default: "0xd70d5fb9582cc3b5b79bbfaecbb7310fd0e3b582", // PermissionedExecutors
+        },
+      },
+      // Mainnet: Deployments
+      deployments: {
+        // ===== Gelato Core ====
+        GelatoCore: "0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8",
+        // === GelatoUserProxies ===
+        GelatoUserProxyFactory: "0xb0aa48f1eF1bF096140E1dA1c76D25151501608b",
+        // ===== Provider Modules ====
+        ProviderModuleGelatoUserProxy:
+            "0x4372692C2D28A8e5E15BC2B91aFb62f5f8812b93",
+        ProviderModuleGnosisSafeProxy:
+            "0x3a994Cd3a464032B8d0eAa16F91C446A46c4fEbC",
+      },
+    },
   },
   solc: {
     version: "0.6.12",
