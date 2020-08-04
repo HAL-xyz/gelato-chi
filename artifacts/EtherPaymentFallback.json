@@ -1,0 +1,14 @@
+{
+  "contractName": "EtherPaymentFallback",
+  "abi": [
+    {
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "fallback"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603b80601d6000396000f3fe608060405200fea265627a7a72315820703f8c280a97bbff00744595902909477b87c1b9cbb101ee591ab28beddb905864736f6c634300050c0032",
+  "deployedBytecode": "0x608060405200fea265627a7a72315820703f8c280a97bbff00744595902909477b87c1b9cbb101ee591ab28beddb905864736f6c634300050c0032",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

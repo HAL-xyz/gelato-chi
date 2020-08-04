@@ -3,9 +3,9 @@
 // Adjusted to have payable modifier
 pragma solidity 0.5.12;
 
-import {Enum} from "@gnosis.pm/safe-contracts/contracts/common/Enum.sol";
-import {GnosisSafeProxy} from "@gnosis.pm/safe-contracts/contracts/proxies/GnosisSafeProxy.sol";
-import {GnosisSafe} from "@gnosis.pm/safe-contracts/contracts/GnosisSafe.sol";
+import {Enum} from "../gnosis-safe/common/Enum.sol";
+import {GnosisSafeProxy} from "../gnosis-safe/proxies/GnosisSafeProxy.sol";
+import {GnosisSafe} from "../gnosis-safe/GnosisSafe.sol";
 
 contract CPKFactoryCustom {
     event ProxyCreation(GnosisSafeProxy proxy);
